@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package api.v1;
+
+option java_package = "io.kubesure.publish";
+option java_outer_classname = "PublisherProtos";
+//option go_package = "github.com/kubesure/api/v1";
+
+service Publisher {
+  rpc Publish(Message) returns (Ack);
+}
+
+message Message { 
+  string version = 1;
+  string payload = 2;
+  string destination = 3; 
+}
+
+message Ack {
+  bool ok = 1;
+}

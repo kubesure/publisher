@@ -1,0 +1,80 @@
+plugins {
+    id 'java'
+    id 'com.google.protobuf' version '0.8.8'    
+    id 'application'
+}
+
+repositories {
+    maven { 
+        url "https://maven-central.storage-download.googleapis.com/repos/central/data/"
+    }
+    mavenLocal()
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+def grpcVersion = '1.19.0' // CURRENT_GRPC_VERSION
+def protobufVersion = '3.6.1'
+def protocVersion = protobufVersion
+
+dependencies {
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    compileOnly "javax.annotation:javax.annotation-api:1.2"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+    runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    //testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+    
+    //testImplementation "junit:junit:4.12"
+    //testImplementation "org.mockito:mockito-core:1.9.5"
+}
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+    }
+
+    //generateProtoTasks.generatedFilesBaseDir = 'generated-sources'
+
+    generateProtoTasks {
+        all()*.plugins { grpc {} }
+        ofSourceSet('main')
+    }
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/protobuf'
+        }
+        java {
+            srcDirs 'src/main/java'
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
+task publisherServer(type: CreateStartScripts) {
+    mainClassName = 'io.kubesure.publish.App'
+    applicationName = 'publisher-server'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task publisherClient(type: CreateStartScripts) {
+    mainClassName = 'io.kubesure.publish.AppClient'
+    applicationName = 'publisher-client'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+applicationDistribution.into('bin') {
+    from(publisherServer)
+    from(publisherClient)
+    fileMode = 0755
+}
+
+// Define the main class for the application
+mainClassName = 'io.kubesure.publish.App'
