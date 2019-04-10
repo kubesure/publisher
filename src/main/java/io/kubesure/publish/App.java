@@ -11,6 +11,7 @@ import io.grpc.ServerBuilder;
 import io.kubesure.publish.PublisherGrpc.PublisherImplBase;
 import io.kubesure.publish.PublisherProtos.Ack;
 import io.kubesure.publish.PublisherProtos.Message;
+import io.kubesure.publish.PublisherProtos.Ack.Builder;
 
 public class App {
 
@@ -50,14 +51,16 @@ public class App {
 
     static class PublisherImpl extends PublisherImplBase {
         @Override
-        public void publish(Message request,
-                io.grpc.stub.StreamObserver<Ack> responseObserver) {
+        public void publish(Message request, io.grpc.stub.StreamObserver<Ack> responseObserver) {
             logger.info("payload : " + request.getPayload());
             logger.info("destination : " + request.getDestination());
             String topic = request.getDestination();
-            KafkaPublisher kafka = new KafkaPublisher(topic, request.getPayload(), true);
+            KafkaMessage kafka = new KafkaMessage(topic, request.getPayload(), true);
             kafka.start();
-            Ack ack = Ack.newBuilder().setOk(true).build();
+            Builder aBuilder = Ack.newBuilder();
+            aBuilder.setOk(true);
+            aBuilder.setOffset(kafka.getOffset());
+            Ack ack = aBuilder.build();
             responseObserver.onNext(ack);
             responseObserver.onCompleted();
         }
