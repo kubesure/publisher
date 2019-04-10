@@ -12,7 +12,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-public class KafkaPublisher extends Thread {
+public class KafkaMessage extends Thread {
 
     private static final Logger logger = Logger.getLogger(AppClient.class.getName());
     private final KafkaProducer<Integer, String> producer;
@@ -25,8 +25,9 @@ public class KafkaPublisher extends Thread {
     public static final int KAFKA_SERVER_PORT = 9092;
     public static final int KAFKA_PRODUCER_BUFFER_SIZE = 64 * 1024;
     public static final int CONNECTION_TIMEOUT = 100000;
+    private long offset;
 
-    public KafkaPublisher(String topic, String message, Boolean isAsync) {
+    public KafkaMessage(String topic, String message, Boolean isAsync) {
 
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER_URL + ":" + KAFKA_SERVER_PORT);
@@ -40,15 +41,31 @@ public class KafkaPublisher extends Thread {
         this.message = message;
     }
 
+    /**
+     * @return the offset
+     */
+    public long getOffset() {
+        return offset;
+    }
+
+    /**
+     * @param offset the offset to set
+     */
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
     public void run() {
         int key = 12121;
         logger.info("isAsync" + isAsync);
         if (isAsync) { // Send asynchronously
+
             producer.send(new ProducerRecord<>(topic, key, this.message),
                     new PolicyIssued(System.currentTimeMillis(), key, this.message));
         } else { // Send synchronously
             try {
-                producer.send(new ProducerRecord<>(topic, key ,this.message)).get();
+                RecordMetadata metadata = producer.send(new ProducerRecord<>(topic, key, this.message)).get();
+                this.setOffset(metadata.offset());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
