@@ -10,6 +10,7 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.kubesure.publish.PublisherGrpc.PublisherImplBase;
 import io.kubesure.publish.PublisherProtos.Ack;
+import io.kubesure.publish.PublisherProtos.Message;
 
 public class App {
 
@@ -18,18 +19,15 @@ public class App {
     private Server server;
 
     private void start() throws IOException {
-        /* The port on which the server should run */
         int port = 50051;
         server = ServerBuilder.forPort(port).addService(new PublisherImpl()).build().start();
         logger.info("Server started, listening on " + port);
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                // Use stderr here since the logger may have been reset by its JVM shutdown
-                // hook.
-                System.err.println("*** shutting down gRPC server since JVM is shutting down");
+                logger.info("*** shutting down gRPC server since JVM is shutting down");
                 App.this.stop();
-                System.err.println("*** server shut down");
+                logger.info("*** server shut down");
             }
         });
     }
@@ -52,9 +50,13 @@ public class App {
 
     static class PublisherImpl extends PublisherImplBase {
         @Override
-        public void publish(io.kubesure.publish.PublisherProtos.Message request,
-                io.grpc.stub.StreamObserver<io.kubesure.publish.PublisherProtos.Ack> responseObserver) {
+        public void publish(Message request,
+                io.grpc.stub.StreamObserver<Ack> responseObserver) {
             logger.info("payload : " + request.getPayload());
+            logger.info("destination : " + request.getDestination());
+            String topic = request.getDestination();
+            KafkaPublisher kafka = new KafkaPublisher(topic, request.getPayload(), true);
+            kafka.start();
             Ack ack = Ack.newBuilder().setOk(true).build();
             responseObserver.onNext(ack);
             responseObserver.onCompleted();

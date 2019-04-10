@@ -9,6 +9,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.kubesure.publish.PublisherProtos.Ack;
 import io.kubesure.publish.PublisherProtos.Message;
+import io.kubesure.publish.PublisherProtos.Message.Builder;
 
 public class AppClient {
 
@@ -30,8 +31,13 @@ public class AppClient {
     }
 
     public void publish(String payload) {
-        logger.info("Pay sent to publisher ");
-        Message message = Message.newBuilder().setPayload(payload).build();
+        logger.info("Payload sent to publisher ");
+        Builder builder = Message.newBuilder();
+        builder.setPayload(payload);
+        builder.setVersion("v1");
+        builder.setType("Policy");
+        builder.setDestination("policyissued");
+        Message message = builder.build();
         Ack ack;
         try {
             ack = blockingStub.publish(message);
