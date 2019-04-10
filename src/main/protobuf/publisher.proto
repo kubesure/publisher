@@ -12,8 +12,9 @@ service Publisher {
 
 message Message { 
   string version = 1;
-  string payload = 2;
-  string destination = 3; 
+  string type = 2;
+  string payload = 3;
+  string destination = 4; 
 }
 
 message Ack {
