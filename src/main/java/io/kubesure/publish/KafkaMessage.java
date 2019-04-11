@@ -14,14 +14,14 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 public class KafkaMessage extends Thread {
 
-    private static final Logger logger = Logger.getLogger(AppClient.class.getName());
+    private static final Logger logger = Logger.getLogger(KafkaMessage.class.getName());
     private final KafkaProducer<Integer, String> producer;
     private final String topic;
     private final Boolean isAsync;
     private final String message;
 
     //public static final String KAFKA_SERVER_URL = "172.18.115.151";
-    public static final String KAFKA_SERVER_URL = "ec2-54-91-28-38.compute-1.amazonaws.com";
+    public static final String KAFKA_SERVER_URL = "ec2-3-90-28-2.compute-1.amazonaws.com";
     public static final int KAFKA_SERVER_PORT = 9092;
     public static final int KAFKA_PRODUCER_BUFFER_SIZE = 64 * 1024;
     public static final int CONNECTION_TIMEOUT = 100000;
@@ -59,7 +59,6 @@ public class KafkaMessage extends Thread {
         int key = 12121;
         logger.info("isAsync" + isAsync);
         if (isAsync) { // Send asynchronously
-
             producer.send(new ProducerRecord<>(topic, key, this.message),
                     new PolicyIssued(System.currentTimeMillis(), key, this.message));
         } else { // Send synchronously
@@ -75,7 +74,7 @@ public class KafkaMessage extends Thread {
 
 class PolicyIssued implements Callback {
 
-    private static final Logger logger = Logger.getLogger(AppClient.class.getName());
+    private static final Logger logger = Logger.getLogger(KafkaMessage.class.getName());
     private final long startTime;
     private final int key;
     private final String message;

@@ -1,4 +1,4 @@
-package io.kubesure.publish;
+package test;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.kubesure.publish.PublisherGrpc;
 import io.kubesure.publish.PublisherProtos.Ack;
 import io.kubesure.publish.PublisherProtos.Message;
 import io.kubesure.publish.PublisherProtos.Message.Builder;
@@ -30,7 +31,7 @@ public class AppClient {
         blockingStub = PublisherGrpc.newBlockingStub(channel);
     }
 
-    public void publish(String payload) {
+    public Ack publish(String payload) {
         logger.info("Payload sent to publisher ");
         Builder builder = Message.newBuilder();
         builder.setPayload(payload);
@@ -38,14 +39,14 @@ public class AppClient {
         builder.setType("Policy");
         builder.setDestination("policyissued");
         Message message = builder.build();
-        Ack ack;
         try {
-            ack = blockingStub.publish(message);
+            Ack ack = blockingStub.publish(message);
+            logger.info("is published: " + ack.getOk());
+            return ack;
         } catch (StatusRuntimeException e) {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
+            return Ack.newBuilder().setOk(false).build(); 
         }
-        logger.info("is published: " + ack.getOk());
     }
 
     public void shutdown() throws InterruptedException {
@@ -65,5 +66,4 @@ public class AppClient {
             client.shutdown();
         }
     }
-
 }

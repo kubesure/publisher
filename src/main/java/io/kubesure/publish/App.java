@@ -50,22 +50,32 @@ public class App {
     }
 
     static class PublisherImpl extends PublisherImplBase {
+
+
         @Override
         public void publish(Message request, io.grpc.stub.StreamObserver<Ack> responseObserver) {
-            logger.info("payload : " + request.getPayload());
-            logger.info("destination : " + request.getDestination());
-            String topic = request.getDestination();
-            KafkaMessage kafka = new KafkaMessage(topic, request.getPayload(), true);
-            kafka.start();
             Builder aBuilder = Ack.newBuilder();
-            aBuilder.setOk(true);
-            aBuilder.setOffset(kafka.getOffset());
-            Ack ack = aBuilder.build();
-            responseObserver.onNext(ack);
-            responseObserver.onCompleted();
+            Ack ack;
+            try {
+                logger.info("payload : " + request.getPayload());
+                logger.info("destination : " + request.getDestination());
+                String topic = request.getDestination();
+                KafkaMessage kafka = new KafkaMessage(topic, request.getPayload(), true);
+                kafka.start();
+                aBuilder.setOk(true);
+                aBuilder.setOffset(kafka.getOffset());
+                ack = aBuilder.build();
+                responseObserver.onNext(ack);
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                aBuilder.setOk(false);
+                ack = aBuilder.build();
+                responseObserver.onCompleted();
+                logger.severe(e.getMessage());
+            }
         }
     }
-
+    
     public static void main(String[] args) throws IOException, InterruptedException {
         final App server = new App();
         server.start();
