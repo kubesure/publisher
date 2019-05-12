@@ -14,3 +14,11 @@ set KAFKA_HEAP_OPTS="-Xmx1G -Xms1G"
 ./kafka-topics.bat --describe --zookeeper localhost:2181 --topic policyissued
 
 ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic policyissued --from-beginning
+
+./gradlew.bat clean
+
+./gradlew.bat install
+
+./build/install/publisher/bin/publisher-server.bat
+
+./gradlew.bat test
