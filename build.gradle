@@ -2,10 +2,7 @@ plugins {
     id 'java'
     id 'com.google.protobuf' version '0.8.8'    
     id 'application'
-
 }
-
-
 
 repositories {
     maven { 
@@ -16,12 +13,11 @@ repositories {
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-def grpcVersion = '1.19.0' // CURRENT_GRPC_VERSION
+def grpcVersion = '1.19.0' 
 def protobufVersion = '3.6.1'
 def protocVersion = protobufVersion
 
 dependencies {
-   
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     compileOnly "javax.annotation:javax.annotation-api:1.2"
