@@ -19,26 +19,18 @@ public class KafkaMessage extends Thread {
     private final String topic;
     private final Boolean isAsync;
     private final String message;
-
-    //public static final String KAFKA_SERVER_URL = "172.18.115.151";
-    public static final String KAFKA_SERVER_URL = "ec2-3-90-28-2.compute-1.amazonaws.com";
-    public static final int KAFKA_SERVER_PORT = 9092;
-    public static final int KAFKA_PRODUCER_BUFFER_SIZE = 64 * 1024;
-    public static final int CONNECTION_TIMEOUT = 100000;
     private long offset;
 
-    public KafkaMessage(String topic, String message, Boolean isAsync) {
-
+    public KafkaMessage(MessageMetaData message) {
         Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER_URL + ":" + KAFKA_SERVER_PORT);
-        logger.info("Kafka url--- " + KAFKA_SERVER_URL);
-        props.put(ProducerConfig.CLIENT_ID_CONFIG, "DemoProducer");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, message.getKafkaBrokerUrl());
+        props.put(ProducerConfig.CLIENT_ID_CONFIG, "KubesureProducer");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         producer = new KafkaProducer<>(props);
-        this.topic = topic;
-        this.isAsync = isAsync;
-        this.message = message;
+        this.topic = message.getTopic();
+        this.isAsync = message.getIsAsync();
+        this.message = message.getMessage();
     }
 
     /**
