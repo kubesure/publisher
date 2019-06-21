@@ -95,6 +95,7 @@ public class App {
                     appProps = new Properties();
                     appProps.load(in);
                 }
+                logger.info(appProps.getProperty("KAFKA_SERVER"));
                 return appProps.getProperty("KAFKA_SERVER") + ":" + appProps.getProperty("KAFKA_SERVER_PORT");
             } catch (IOException e) {
                 logger.severe("error loading properties file from classpath");
