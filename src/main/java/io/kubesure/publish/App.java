@@ -3,15 +3,18 @@
  */
 package io.kubesure.publish;
 
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.kubesure.publish.PublisherGrpc.PublisherImplBase;
 import io.kubesure.publish.PublisherProtos.Ack;
-import io.kubesure.publish.PublisherProtos.Message;
 import io.kubesure.publish.PublisherProtos.Ack.Builder;
+import io.kubesure.publish.PublisherProtos.Message;
 
 public class App {
 
@@ -51,7 +54,6 @@ public class App {
 
     static class PublisherImpl extends PublisherImplBase {
 
-
         @Override
         public void publish(Message request, io.grpc.stub.StreamObserver<Ack> responseObserver) {
             Builder aBuilder = Ack.newBuilder();
@@ -59,8 +61,12 @@ public class App {
             try {
                 logger.info("payload : " + request.getPayload());
                 logger.info("destination : " + request.getDestination());
-                String topic = request.getDestination();
-                KafkaMessage kafka = new KafkaMessage(topic, request.getPayload(), true);
+                MessageMetaData metaData = new MessageMetaData();
+                metaData.setIsAsync(false);
+                metaData.setMessage(request.getPayload());
+                metaData.setTopic(request.getDestination());
+                metaData.setKafkaBrokerUrl(this.getBrokerURL());
+                KafkaMessage kafka = new KafkaMessage(metaData);
                 kafka.start();
                 aBuilder.setOk(true);
                 aBuilder.setOffset(kafka.getOffset());
@@ -74,8 +80,31 @@ public class App {
                 logger.severe(e.getMessage());
             }
         }
+
+        private String getBrokerURL() throws IOException {
+            try {
+                String appConfigLocation = System.getenv("APP_CONFIG_FILE");
+                logger.info(appConfigLocation);
+                Properties appProps = new Properties();
+                InputStream in = null;
+                if (appConfigLocation != null && appConfigLocation.length() != 0) {
+                    FileReader reader = new FileReader(appConfigLocation);
+                    appProps.load(reader);
+                } else {
+                    in = this.getClass().getClassLoader().getResourceAsStream("application.properties");
+                    appProps = new Properties();
+                    appProps.load(in);
+                }
+                logger.info(appProps.getProperty("KAFKA_SERVER"));
+                return appProps.getProperty("KAFKA_SERVER") + ":" + appProps.getProperty("KAFKA_SERVER_PORT");
+            } catch (IOException e) {
+                logger.severe("error loading properties file from classpath");
+                e.printStackTrace();
+                throw e;
+            }
+        }
     }
-    
+
     public static void main(String[] args) throws IOException, InterruptedException {
         final App server = new App();
         server.start();
