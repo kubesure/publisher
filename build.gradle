@@ -80,5 +80,6 @@ applicationDistribution.into('bin') {
     fileMode = 0755
 }
 
+
 // Define the main class for the application
 mainClassName = 'io.kubesure.publish.App'
