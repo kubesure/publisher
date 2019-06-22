@@ -3,4 +3,4 @@ WORKDIR /app
 COPY build/install/publisher/lib /app/lib
 COPY build/install/publisher/bin /app/bin 
 EXPOSE 50051
-ENTRYPOINT [/app/bin/publisher-server]
+CMD ["./bin/publisher-server"]
