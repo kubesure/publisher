@@ -23,7 +23,7 @@ pull:
 build:
 	gradle clean install -x test
 	go get github.com/grpc-ecosystem/grpc-health-probe
-	go build github.com/grpc-ecosystem/grpc-health-probe
+	go build -tags netgo -ldflags=-w github.com/grpc-ecosystem/grpc-health-probe
 
 .PHONY: run # - Runs the service without build
 run:
