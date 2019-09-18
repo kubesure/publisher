@@ -12,6 +12,9 @@ import io.kubesure.publish.PublisherProtos.Ack;
 import io.kubesure.publish.PublisherProtos.Message;
 import io.kubesure.publish.PublisherProtos.Message.Builder;
 
+/**
+* Test client
+*/
 public class AppClient {
 
     private static final Logger logger = Logger.getLogger(AppClient.class.getName());

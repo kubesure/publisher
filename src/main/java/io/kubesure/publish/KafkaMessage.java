@@ -12,6 +12,9 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+/**
+* Represent a Kafka message. Used by the service only.   
+*/
 public class KafkaMessage extends Thread {
 
     private static final Logger logger = Logger.getLogger(KafkaMessage.class.getName());

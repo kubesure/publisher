@@ -17,6 +17,11 @@ import io.kubesure.publish.PublisherProtos.Ack;
 import io.kubesure.publish.PublisherProtos.Ack.Builder;
 import io.kubesure.publish.PublisherProtos.Message;
 
+/**
+ *  App service is abstracts client from broker implemenation and provides a protobuff/GRPC interface 
+ *  for publishing messages to the abstracted broker. This implementation publisher message to Kafka.
+*/
+
 public class App {
 
     private static final Logger logger = Logger.getLogger(App.class.getName());
@@ -58,6 +63,7 @@ public class App {
         }
     }
 
+    //publisher message to kafka
     static class PublisherImpl extends PublisherImplBase {
 
         @Override
