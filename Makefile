@@ -20,17 +20,19 @@ pull:
 	git pull
 
 .PHONY: build # - Run gradle build
-gbuild:
-	gradle build -x test
+build:
+	gradle clean install -x test
+	go get github.com/grpc-ecosystem/grpc-health-probe
+	go build -tags netgo -ldflags=-w github.com/grpc-ecosystem/grpc-health-probe
 
 .PHONY: run # - Runs the service without build
 run:
 	./build/install/publisher/bin/publisher-server
 
 .PHONY: dbuild  # - Builds docker image
-dbuild: gbuild
+dbuild: build
 
-        $(DBUILD) . -t $(TAG_LOCAL)
+	$(DBUILD) . -t $(TAG_LOCAL)
 
 .PHONY: dtag # - Tags local image to docker hub tag
 dtag: dbuild

@@ -11,10 +11,16 @@ import java.util.logging.Logger;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.services.HealthStatusManager;
 import io.kubesure.publish.PublisherGrpc.PublisherImplBase;
 import io.kubesure.publish.PublisherProtos.Ack;
 import io.kubesure.publish.PublisherProtos.Ack.Builder;
 import io.kubesure.publish.PublisherProtos.Message;
+
+/**
+ *  App service is abstracts client from broker implemenation and provides a protobuff/GRPC interface 
+ *  for publishing messages to the abstracted broker. This implementation publisher message to Kafka.
+*/
 
 public class App {
 
@@ -24,7 +30,12 @@ public class App {
 
     private void start() throws IOException {
         int port = 50051;
-        server = ServerBuilder.forPort(port).addService(new PublisherImpl()).build().start();
+        //server = ServerBuilder.forPort(port).addService(new PublisherImpl()).build().start();
+        ServerBuilder sBuilder = ServerBuilder.forPort(port);
+        sBuilder.addService(new PublisherImpl());
+        sBuilder.addService(new HealthStatusManager().getHealthService());
+        server = sBuilder.build();
+        server.start();
         logger.info("Server started, listening on " + port);
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -52,6 +63,7 @@ public class App {
         }
     }
 
+    //publisher message to kafka
     static class PublisherImpl extends PublisherImplBase {
 
         @Override
