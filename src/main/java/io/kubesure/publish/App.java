@@ -18,9 +18,10 @@ import io.kubesure.publish.PublisherProtos.Ack.Builder;
 import io.kubesure.publish.PublisherProtos.Message;
 
 /**
- *  App service is abstracts client from broker implemenation and provides a protobuff/GRPC interface 
- *  for publishing messages to the abstracted broker. This implementation publisher message to Kafka.
-*/
+ * App service is abstracts client from broker implemenation and provides a
+ * protobuff/GRPC interface for publishing messages to the abstracted broker.
+ * This implementation publisher message to Kafka.
+ */
 
 public class App {
 
@@ -28,9 +29,16 @@ public class App {
 
     private Server server;
 
+    public static void main(String[] args) throws IOException, InterruptedException {
+        final App server = new App();
+        server.start();
+        server.blockUntilShutdown();
+    }
+
     private void start() throws IOException {
         int port = 50051;
-        //server = ServerBuilder.forPort(port).addService(new PublisherImpl()).build().start();
+        // server = ServerBuilder.forPort(port).addService(new
+        // PublisherImpl()).build().start();
         ServerBuilder sBuilder = ServerBuilder.forPort(port);
         sBuilder.addService(new PublisherImpl());
         sBuilder.addService(new HealthStatusManager().getHealthService());
@@ -63,7 +71,7 @@ public class App {
         }
     }
 
-    //publisher message to kafka
+    // publisher message to kafka
     static class PublisherImpl extends PublisherImplBase {
 
         @Override
@@ -93,6 +101,11 @@ public class App {
             }
         }
 
+        /**
+         * 
+         * @return kafka bootstrap hostname:port
+         * @throws IOException
+         */
         private String getBrokerURL() throws IOException {
             try {
                 String appConfigLocation = System.getenv("APP_CONFIG_FILE");
@@ -115,11 +128,5 @@ public class App {
                 throw e;
             }
         }
-    }
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-        final App server = new App();
-        server.start();
-        server.blockUntilShutdown();
     }
 }

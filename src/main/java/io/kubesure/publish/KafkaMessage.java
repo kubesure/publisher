@@ -1,5 +1,8 @@
 package io.kubesure.publish;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -13,27 +16,33 @@ import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 /**
-* Represent a Kafka message. Used by the service only.   
-*/
+ * Represent a Kafka message. Used by the service only.
+ */
 public class KafkaMessage extends Thread {
 
     private static final Logger logger = Logger.getLogger(KafkaMessage.class.getName());
-    private final KafkaProducer<Integer, String> producer;
-    private final String topic;
-    private final Boolean isAsync;
-    private final String message;
+    private KafkaProducer<Integer, String> producer = null;
+    private String topic = null;
+    private Boolean isAsync = null;
+    private String message = null;
     private long offset;
 
     public KafkaMessage(MessageMetaData message) {
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, message.getKafkaBrokerUrl());
-        props.put(ProducerConfig.CLIENT_ID_CONFIG, "KubesureProducer");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class.getName());
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        producer = new KafkaProducer<>(props);
-        this.topic = message.getTopic();
-        this.isAsync = message.getIsAsync();
-        this.message = message.getMessage();
+        try {
+            Properties props = getConfigProperties();
+            // props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+            // message.getKafkaBrokerUrl());
+            // props.put(ProducerConfig.CLIENT_ID_CONFIG, "KubesureProducer");
+            props.put(ProducerConfig.ACKS_CONFIG, "all");
+            props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class.getName());
+            props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+            producer = new KafkaProducer<>(props);
+            this.topic = message.getTopic();
+            this.isAsync = message.getIsAsync();
+            this.message = message.getMessage();
+        } catch (Exception e) {
+            logger.severe(e.toString());
+        }
     }
 
     /**
@@ -64,6 +73,29 @@ public class KafkaMessage extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    private Properties getConfigProperties() throws IOException {
+        try {
+            String appConfigLocation = System.getenv("APP_CONFIG_FILE");
+            logger.info(appConfigLocation);
+            Properties appProps = new Properties();
+            InputStream in = null;
+            if (appConfigLocation != null && appConfigLocation.length() != 0) {
+                FileReader reader = new FileReader(appConfigLocation);
+                appProps.load(reader);
+            } else {
+                in = this.getClass().getClassLoader().getResourceAsStream("application.properties");
+                appProps = new Properties();
+                appProps.load(in);
+                return appProps;
+            }
+        } catch (IOException e) {
+            logger.severe("error loading properties file from classpath");
+            e.printStackTrace();
+            throw e;
+        }
+        return null;
     }
 }
 
