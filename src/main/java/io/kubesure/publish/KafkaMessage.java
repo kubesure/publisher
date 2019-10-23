@@ -29,6 +29,10 @@ public class KafkaMessage extends Thread {
 
     public KafkaMessage(MessageMetaData message) {
         try {
+            logger.info(System.getenv("CC_USERNAME"));
+            logger.info(System.getenv("CC_PASSWORD"));
+            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
+            String jaasCfg = String.format(jaasTemplate, System.getenv("CC_USERNAME"), System.getenv("CC_PASSWORD"));
             Properties props = getConfigProperties();
             // props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
             // message.getKafkaBrokerUrl());
@@ -36,6 +40,7 @@ public class KafkaMessage extends Thread {
             props.put(ProducerConfig.ACKS_CONFIG, "all");
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class.getName());
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+            props.put("sasl.jaas.config", jaasCfg);
             producer = new KafkaProducer<>(props);
             this.topic = message.getTopic();
             this.isAsync = message.getIsAsync();

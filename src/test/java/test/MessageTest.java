@@ -11,8 +11,8 @@ public class MessageTest {
     @Test
     public void testPublishMsg() throws Exception {
         AppClient client = new AppClient("localhost", 50051);
-        String payload = "supplies to mars";
-        assertTrue("message not published", client.publish(payload).getOk());
+        String payload = "Musky";
+        assertTrue("message not published", client.publish(payload,"users").getOk());
         client.shutdown();
     }
 }

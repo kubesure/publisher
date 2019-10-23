@@ -34,13 +34,13 @@ public class AppClient {
         blockingStub = PublisherGrpc.newBlockingStub(channel);
     }
 
-    public Ack publish(String payload) {
+    public Ack publish(String payload, String topic) {
         logger.info("Payload sent to publisher ");
         Builder builder = Message.newBuilder();
         builder.setPayload(payload);
         builder.setVersion("v1");
         builder.setType("Policy");
-        builder.setDestination("policyissued");
+        builder.setDestination(topic);
         Message message = builder.build();
         try {
             Ack ack = blockingStub.publish(message);
@@ -64,7 +64,7 @@ public class AppClient {
             if (args.length > 0) {
                 payload = args[0]; /* Use the arg as the name to greet if provided */
             }
-            client.publish(payload);
+            client.publish(payload,"users");
         } finally {
             client.shutdown();
         }
