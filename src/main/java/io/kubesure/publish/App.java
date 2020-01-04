@@ -102,10 +102,13 @@ public class App {
         }
 
         /**
-         * 
+         * Depricate method as propertie file is loaded in KafkaMessage. Broker url to be
+         * loaded in k8s env in method start() to avoid file read in container. 
          * @return kafka bootstrap hostname:port
          * @throws IOException
-         */
+         *   
+         **/
+        @Deprecated
         private String getBrokerURL() throws IOException {
             try {
                 String appConfigLocation = System.getenv("APP_CONFIG_FILE");
