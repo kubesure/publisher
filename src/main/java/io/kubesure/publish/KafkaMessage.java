@@ -37,6 +37,7 @@ public class KafkaMessage extends Thread {
             // props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
             // message.getKafkaBrokerUrl());
             // props.put(ProducerConfig.CLIENT_ID_CONFIG, "KubesureProducer");
+            logger.info("Kafka Broker " +  props.getProperty("bootstrap.servers"));
             props.put(ProducerConfig.ACKS_CONFIG, "all");
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class.getName());
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -93,14 +94,20 @@ public class KafkaMessage extends Thread {
                 in = this.getClass().getClassLoader().getResourceAsStream("application.properties");
                 appProps = new Properties();
                 appProps.load(in);
-                return appProps;
+                
             }
+            //logger.info("host " + appProps.getProperty("host"));
+            //logger.info("port " + appProps.getProperty("port"));
+            //InetAddress address = InetAddress.getByName(appProps.getProperty("host"));
+            //logger.info("ip of confluent " + address.getHostAddress());
+            //appProps.setProperty("bootstrap.servers", address.getHostAddress()+ ":" + appProps.getProperty("port"));
+            //logger.info("broker " + appProps.getProperty("bootstrap.servers"));
+            return appProps;
         } catch (IOException e) {
             logger.severe("error loading properties file from classpath");
             e.printStackTrace();
             throw e;
         }
-        return null;
     }
 }
 
