@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import io.grpc.services.HealthStatusManager;
 import io.kubesure.publish.PublisherGrpc.PublisherImplBase;
 import io.kubesure.publish.PublisherProtos.Ack;
@@ -42,6 +43,7 @@ public class App {
         ServerBuilder sBuilder = ServerBuilder.forPort(port);
         sBuilder.addService(new PublisherImpl());
         sBuilder.addService(new HealthStatusManager().getHealthService());
+        sBuilder.addService(ProtoReflectionService.newInstance());
         server = sBuilder.build();
         server.start();
         logger.info("Server started, listening on " + port);
