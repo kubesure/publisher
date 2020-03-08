@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import io.kubesure.publish.PublisherGrpc;
 import io.kubesure.publish.PublisherProtos.Ack;
 import io.kubesure.publish.PublisherProtos.Message;
 import io.kubesure.publish.PublisherProtos.Message.Builder;
