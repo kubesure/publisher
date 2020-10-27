@@ -1,23 +1,31 @@
-# publisher
+# Publisher API to a Kafka or any broker 
 
-Publisher API to a Kafka or any broker
+### publisher dev setup 
 
-set KAFKA_HEAP_OPTS="-Xmx1G -Xms1G"
+Create topic policyissued
 
-./zookeeper-server-stop.sh config/zookeeper.properties &
+Development relies SCRAM auth. For a quick dev & test create a Kafka broker on Confluent Cloud
 
-./kafka-server-start.sh config/server.properties & 
+create topic policyissued
 
-./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic policyissued
+export CC_USERNAME=Confluent cloud api key
+export CC_PASSWORD=Confluent cloud api secret
 
-./kafka-topics.bat --describe --zookeeper localhost:2181 --topic policyissued
+configure application.properties
 
-./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic policyissued --from-beginning
+make build
+make run
 
-./gradlew.bat clean
+gradle test
 
-./gradlew.bat install
+or
 
-./build/install/publisher/bin/publisher-server.bat
 
-./gradlew.bat test
+grpcurl -plaintext -d @ publishersvc:50051 Publisher/Publish <<EOM
+{
+  "version" : "v1",
+  "type" : "policy",
+  "payload" : "Istio grp curl message",
+  "destination" : "policyissued"
+}
+EOM

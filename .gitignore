@@ -8,3 +8,4 @@ bin
 .project
 *.log
 grpc-health-probe
+scrap
